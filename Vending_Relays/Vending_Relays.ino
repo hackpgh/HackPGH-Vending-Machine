@@ -1,6 +1,7 @@
 /* This code is intended to run the Relay board in the HackPGH 'Vend ~N~ Hack' vending machine.
  * Written by Bob Burger, Geno Soroka, Greg Land & chad elish.
  * Modified for Coin Reader by Geno Soroka 10/29/17
+ * Fixed LCD overflow issue, added lcd.clear( ) 11/7/17, Geno Soroka
  */
  // LCD Code
 #include <stdlib.h>
@@ -47,6 +48,7 @@ void setup()
   lcd.backlight(); // finish with backlight on 
   //-------- Write characters on the display ------------------
   // NOTE: Cursor Position: (CHAR, LINE) start at 0  
+  lcd.clear ( );
   lcd.setCursor(4,0); //Start at character 4 on line 0
   lcd.print("Vend n' Hack");
   delay(1000);
@@ -75,6 +77,7 @@ void loop()
             if (AmountQuarters>= prices[ch-65])
             {
               AmountQuarters=AmountQuarters-prices[ch-65]; //Subtract the number of quarters which the item costs     
+              lcd.clear ( );
               lcd.setCursor(5,3); //Start at character 0 on line 4
               lcd.print("Vending: ");
               lcd.print(ch);
@@ -113,6 +116,13 @@ void loop()
    if (duration>=15000)
    {
     AmountQuarters+=25;
+    lcd.clear ( );
+    lcd.setCursor(4,0); //Start at character 4 on line 0
+    lcd.print("Vend n' Hack");
+    lcd.setCursor(14,1);
+    lcd.print("(v.3b)");
+    lcd.setCursor(4,3); //Start at character 0 on line 4
+    lcd.print("                  ");
     lcd.setCursor(7,3); 
     lcd.print('$');
     lcd.setCursor(8,3);

@@ -1,13 +1,25 @@
+
+
 /* This code is intended to run the Relay board in the HackPGH 'Vend ~N~ Hack' vending machine.
- * Written by Bob Burger, Geno Soroka, Greg Land & chad elish.
+ * Written by Bob Burger, Geno Soroka, Greg Land & Chad Elish.
  * Modified for Coin Reader by Geno Soroka 10/29/17
  * Fixed LCD overflow issue, added lcd.clear( ) 11/7/17, Geno Soroka
+ * Added bill reader, 11/18/17, Geno Soroka
  */
  // LCD Code
 #include <stdlib.h>
 #include <Wire.h>   // Comes with Arduino IDE
 #include <LiquidCrystal_I2C.h>
+#include <Arduino.h>
+#include <Apex5400BillAcceptor.h>
 LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
+
+#define PIN_ENABLE 7 //Purple wire, to enable set low, to disable set high
+#define PIN_INTERRUPT_LINE 8 //Orange wire on Apex, Request to send data to host
+#define PIN_SEND_LINE 9 //White/Blue wire, Host Ready Signal
+#define PIN_TTL_RX 10 //Green wire, Transmit Data Line from acceptor
+
+Apex5400BillAcceptor *billAcceptor;
 
 const int firstPin = 22;
 const int buttonPin = 2;     // the number of the "encoder" pin
@@ -21,12 +33,15 @@ int inMax = 48; // Highest input pin to set as output
 //Snack prices lookup table, change this if snack prices change. Note Q=0 because there is no Q
 const unsigned int prices[] = {50,50,50,50,50,50,100,100,100,50,100,100,100,100,100,100,0,100,100,100,100,50,100,50,50,50};
 unsigned long duration=0; //Coin Reader pulse duration
-unsigned int AmountQuarters=0; // Total amount of quarters available to purchase snacks
+unsigned int AmountMoney=0; // Total amount of money available to purchase snacks (in cents, i.e. 50= $0.50, 100= $1.00)
 char PriceDisplay[10]; // ASCII buffer for displaying price
+
+int code;
 
 void setup() 
 {
   Serial.begin(9600);
+  billAcceptor = new Apex5400BillAcceptor(PIN_ENABLE, PIN_INTERRUPT_LINE, PIN_SEND_LINE, PIN_TTL_RX);
   pinMode(buttonPin, INPUT);
   pinMode(52,INPUT); // coin reader pin
   digitalWrite(52, HIGH); // pull up
@@ -57,7 +72,7 @@ void setup()
   lcd.setCursor(7,3); 
   lcd.print('$');
   lcd.setCursor(8,3);
-  sprintf(PriceDisplay,"%d.%02d",AmountQuarters/100,AmountQuarters%100);
+  sprintf(PriceDisplay,"%d.%02d",AmountMoney/100,AmountMoney%100);
   lcd.print(PriceDisplay);
 } /*--(end setup )---*/
 
@@ -73,10 +88,10 @@ void loop()
       {
           if (digitalRead(buttonPin) == HIGH)
           {
-            //Only activate coil if user dropped in enough quarters
-            if (AmountQuarters>= prices[ch-65])
+            //Only activate coil if user dropped in enough money
+            if (AmountMoney>= prices[ch-65])
             {
-              AmountQuarters=AmountQuarters-prices[ch-65]; //Subtract the number of quarters which the item costs     
+              AmountMoney=AmountMoney-prices[ch-65]; //Subtract the amount which the item costs     
               lcd.clear ( );
               lcd.setCursor(5,3); //Start at character 0 on line 4
               lcd.print("Vending: ");
@@ -103,7 +118,7 @@ void loop()
               lcd.setCursor(7,3); 
               lcd.print('$');
               lcd.setCursor(8,3);
-              sprintf(PriceDisplay,"%d.%02d",AmountQuarters/100,AmountQuarters%100);
+              sprintf(PriceDisplay,"%d.%02d",AmountMoney/100,AmountMoney%100);
               lcd.print(PriceDisplay);
             }
        
@@ -115,7 +130,7 @@ void loop()
    duration = pulseIn(52, HIGH); 
    if (duration>=15000)
    {
-    AmountQuarters+=25;
+    AmountMoney+=25;
     lcd.clear ( );
     lcd.setCursor(4,0); //Start at character 4 on line 0
     lcd.print("Vend n' Hack");
@@ -126,11 +141,47 @@ void loop()
     lcd.setCursor(7,3); 
     lcd.print('$');
     lcd.setCursor(8,3);
-    sprintf(PriceDisplay,"%d.%02d",AmountQuarters/100,AmountQuarters%100);
+    sprintf(PriceDisplay,"%d.%02d",AmountMoney/100,AmountMoney%100);
     lcd.print(PriceDisplay);
    }
    
-  
+   if(code = billAcceptor->checkForBill())
+    {
+      switch (code)
+      {
+        case 0x81:
+        AmountMoney+=100;
+        break;
+        case 0x83:
+        AmountMoney+=500;
+        break;
+        case 0x84:
+        AmountMoney+=1000;
+        break;
+        case 0x85:
+        AmountMoney+=2000;
+        break;
+        case 0x86:
+        AmountMoney+=5000;
+        break;
+        case 0x87:
+        AmountMoney+=10000;
+        break;
+      }
+
+      lcd.clear ( );
+      lcd.setCursor(4,0); //Start at character 4 on line 0
+      lcd.print("Vend n' Hack");
+      lcd.setCursor(14,1);
+      lcd.print("(v.3b)");
+      lcd.setCursor(4,3); //Start at character 0 on line 4
+      lcd.print("                  ");
+      lcd.setCursor(7,3); 
+      lcd.print('$');
+      lcd.setCursor(8,3);
+      sprintf(PriceDisplay,"%d.%02d",AmountMoney/100,AmountMoney%100);
+      lcd.print(PriceDisplay);
+    }
 }
   
 int charToPin(char ch) {

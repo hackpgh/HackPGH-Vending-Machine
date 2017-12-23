@@ -5,6 +5,7 @@
  * Modified for Coin Reader by Geno Soroka 10/29/17
  * Fixed LCD overflow issue, added lcd.clear( ) 11/7/17, Geno Soroka
  * Added bill reader, 11/18/17, Geno Soroka
+ * Changed prices for Arduinos, Pi's, and movie Hackers, 12/22/17
  */
  // LCD Code
 #include <stdlib.h>

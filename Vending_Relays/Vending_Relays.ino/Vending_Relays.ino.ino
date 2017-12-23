@@ -31,7 +31,7 @@ int inMin = 22; // Lowest input pin to set as output
 int inMax = 48; // Highest input pin to set as output
 
 //Snack prices lookup table, change this if snack prices change. Note Q=0 because there is no Q
-const unsigned int prices[] = {50,50,50,50,50,50,100,100,100,50,100,100,100,100,100,100,0,100,100,100,100,50,100,50,50,50};
+const unsigned int prices[] = {50,50,50,50,1337,1000,2000,100,1500,2000,100,100,100,100,100,100,0,100,100,100,100,100,100,50,50,50};
 unsigned long duration=0; //Coin Reader pulse duration
 unsigned int AmountMoney=0; // Total amount of money available to purchase snacks (in cents, i.e. 50= $0.50, 100= $1.00)
 char PriceDisplay[10]; // ASCII buffer for displaying price

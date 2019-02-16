@@ -1,15 +1,13 @@
 
 
-/* This code is intended to run the relay board, LCD, coin mech, and dollar mech in the HackPGH 'Vend ~N~ Hack' vending machine.
- * Please see "Vending_Machine_Buttons" for keypad code.
- * Written by Bob Burger, Geno Soroka, Greg Land, Jacques Parker & Chad Elish.
+/* This code is intended to run the Relay board in the HackPGH 'Vend ~N~ Hack' vending machine.
+ * Written by Bob Burger, Geno Soroka, Greg Land & Chad Elish.
  * Modified for Coin Reader by Geno Soroka 10/29/17
  * Fixed LCD overflow issue, added lcd.clear( ) 11/7/17, Geno Soroka
  * Added bill reader, 11/18/17, Geno Soroka
- * Added out of order feature for non-alighned coils, 12/2/18, Chad Elish
+ * Changed prices for Arduinos, Pi's, and movie Hackers, 12/22/17
  */
-
-// LCD Code
+ // LCD Code
 #include <stdlib.h>
 #include <Wire.h>   // Comes with Arduino IDE
 #include <LiquidCrystal_I2C.h>
@@ -45,7 +43,7 @@ void setup()
 {
   Serial.begin(9600);
   billAcceptor = new Apex5400BillAcceptor(PIN_ENABLE, PIN_INTERRUPT_LINE, PIN_SEND_LINE, PIN_TTL_RX);
-  pinMode(buttonPin, INPUT); // Coil reader pin?
+  pinMode(buttonPin, INPUT);
   pinMode(52,INPUT); // coin reader pin
   digitalWrite(52, HIGH); // pull up
   for(int i=inMin; i<=inMax; i++)
@@ -71,7 +69,7 @@ void setup()
   lcd.print("Vend n' Hack");
   delay(1000);
   lcd.setCursor(14,1);
-  lcd.print("(v.4b)"); 
+  lcd.print("(v.3b)"); 
   lcd.setCursor(7,3); 
   lcd.print('$');
   lcd.setCursor(8,3);
@@ -82,39 +80,7 @@ void setup()
 
 void loop()
 {
-  if (digitalRead(buttonPin) == LOW)
-  {
-    lcd.clear ( );
-    lcd.setCursor(4,0); //Start at character 4 on line 0
-    lcd.print("Vend n' Hack");
-    lcd.setCursor(14,1);
-    lcd.print("(v.4b)");
-    lcd.setCursor(4,2); //Start at character 0 on line 4
-    lcd.print("OUT OF ORDER");
-    lcd.setCursor(4,3); 
-    lcd.print("CHECK COILS!");
-    while (digitalRead(buttonPin) == LOW)
-    {
-      lcd.noBacklight();
-      delay(250);
-      lcd.backlight();
-      delay(250);
-    }
-    lcd.clear ( );
-    lcd.setCursor(4,0); //Start at character 4 on line 0
-    lcd.print("Vend n' Hack");
-    delay(1000);
-    lcd.setCursor(14,1);
-    lcd.print("(v.4b)"); 
-    lcd.setCursor(7,3); 
-    lcd.print('$');
-    lcd.setCursor(8,3);
-    sprintf(PriceDisplay,"%d.%02d",AmountMoney/100,AmountMoney%100);
-    lcd.print(PriceDisplay);
-    
-    
-  }
-  else if (Serial.available() > 0) 
+  if (Serial.available() > 0) 
   {
       ch = Serial.read();
       relaypin = charToPin(ch);
@@ -147,7 +113,7 @@ void loop()
               lcd.setCursor(4,0); //Start at character 4 on line 0
               lcd.print("Vend n' Hack");
               lcd.setCursor(14,1);
-              lcd.print("(v.4b)");
+              lcd.print("(v.3b)");
               lcd.setCursor(4,3); //Start at character 0 on line 4
               lcd.print("                  ");
               lcd.setCursor(7,3); 
@@ -170,7 +136,7 @@ void loop()
     lcd.setCursor(4,0); //Start at character 4 on line 0
     lcd.print("Vend n' Hack");
     lcd.setCursor(14,1);
-    lcd.print("(v.4b)");
+    lcd.print("(v.3b)");
     lcd.setCursor(4,3); //Start at character 0 on line 4
     lcd.print("                  ");
     lcd.setCursor(7,3); 
@@ -208,7 +174,7 @@ void loop()
       lcd.setCursor(4,0); //Start at character 4 on line 0
       lcd.print("Vend n' Hack");
       lcd.setCursor(14,1);
-      lcd.print("(v.4b)");
+      lcd.print("(v.3b)");
       lcd.setCursor(4,3); //Start at character 0 on line 4
       lcd.print("                  ");
       lcd.setCursor(7,3); 

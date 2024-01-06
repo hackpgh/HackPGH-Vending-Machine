@@ -89,8 +89,8 @@ void loop()
       
       if (relaypin > 0)      
       {
-          if (digitalRead(buttonPin) == HIGH)
-          {
+          //if (digitalRead(buttonPin) == HIGH)
+          //{
             //Only activate coil if user dropped in enough money
             if (AmountMoney>= prices[ch-65])
             {
@@ -102,11 +102,11 @@ void loop()
               digitalWrite(relaypin, LOW);
               //Serial.println("LED ON!");
               //Serial.println("Waiting");
-              delay (1000);
-              while (digitalRead(buttonPin) == LOW)
-              {
+              delay (2000);
+              //while (digitalRead(buttonPin) == LOW)
+              //{
                 //buttonState = digitalRead(buttonPin); \\Just another way to code the same thing with more code and varibles
-              }
+              //}
               //Serial.println("Button Unpressed!");  
               digitalWrite(relaypin, HIGH);
               //Serial.println("LED OFF!");
@@ -125,7 +125,7 @@ void loop()
               lcd.print(PriceDisplay);
             }
        
-           }
+           //}
        }
    }
 
